@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { GlassCard } from '@/app/components/GlassCard';
 
 interface Group {
@@ -126,9 +127,14 @@ export default function TeacherGrades() {
   return (
     <div className="min-h-screen p-8">
       <GlassCard className="mb-8">
-        <h1 className="text-3xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-          Журнал успеваемости
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+            Журнал успеваемости
+          </h1>
+          <Link href="/reports" className="glass-button px-4 py-2 rounded-lg">
+            Отчеты
+          </Link>
+        </div>
         
         <div className="flex gap-4 mb-4">
           <select

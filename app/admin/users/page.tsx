@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
+import Link from 'next/link';
 import { GlassCard } from '@/app/components/GlassCard';
 
 interface User {
@@ -65,9 +66,14 @@ export default function AdminUsersPage() {
   return (
     <div className="min-h-screen p-8">
       <GlassCard className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
-          Управление пользователями
-        </h1>
+        <div className="flex justify-between items-center mb-2">
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+            Управление пользователями
+          </h1>
+          <Link href="/reports" className="glass-button px-4 py-2 rounded-lg">
+            Отчеты
+          </Link>
+        </div>
         <p className="text-gray-500">Административная панель</p>
       </GlassCard>
 
