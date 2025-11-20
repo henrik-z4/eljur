@@ -1,2 +1,41 @@
-.*
-!.gitignore
+# зависимости
+/node_modules
+/.pnp
+.pnp.js
+
+# тестирование
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# производство
+/build
+
+# прочее
+.DS_Store
+*.pem
+
+# отладка
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# локальные файлы окружения
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma
+/prisma/*.db
+/prisma/*.db-journal
+
+# гитхаба мусор
+.github
