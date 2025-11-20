@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { GlassCard } from '@/app/components/GlassCard';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -9,7 +10,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -22,9 +23,7 @@ export default function LoginPage() {
 
       if (res.ok) {
         const data = await res.json();
-        // сохранить токен в cookie или localStorage (упрощенно для MVP)
-        // идеально использовать httpOnly cookie, устанавливаемые сервером
-        // здесь просто перенаправляем на основе роли
+        // перенаправление на основе роли
         if (data.role === 'teacher') router.push('/teacher/grades');
         else if (data.role === 'student') router.push('/student/profile');
         else if (data.role === 'admin') router.push('/admin/users');
@@ -38,39 +37,50 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Вход в систему</h2>
-        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <GlassCard className="w-full max-w-md p-8">
+        <h2 className="text-3xl font-bold mb-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+          Вход в систему
+        </h2>
+        <p className="text-center text-gray-500 mb-8">Электронный журнал</p>
+        
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg mb-6 text-center text-sm">
+            {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-gray-600 text-sm font-medium mb-2">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="glass-input w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500/50"
+              placeholder="name@eljur.local"
               required
             />
           </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Пароль</label>
+          <div>
+            <label className="block text-gray-600 text-sm font-medium mb-2">Пароль</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="glass-input w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500/50"
+              placeholder="••••••••"
               required
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-200"
+            className="glass-button glass-button-primary w-full font-bold py-3 px-4 rounded-lg mt-4"
           >
             Войти
           </button>
         </form>
-      </div>
+      </GlassCard>
     </div>
   );
 }

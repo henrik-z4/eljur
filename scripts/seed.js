@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  // Clean up
+  // чистим
   await prisma.grade.deleteMany();
   await prisma.student.deleteMany();
   await prisma.teacher.deleteMany();
@@ -12,7 +12,7 @@ async function main() {
   await prisma.subject.deleteMany();
   await prisma.user.deleteMany();
 
-  // Create Admin
+  // создаем админа (бан)
   const adminHash = await bcrypt.hash('AdminPass123', 10);
   await prisma.user.create({
     data: {
@@ -23,13 +23,13 @@ async function main() {
     },
   });
 
-  // Create Teacher
+  // создаем преподавателя
   const teacherHash = await bcrypt.hash('TeacherPass123', 10);
   const teacherUser = await prisma.user.create({
     data: {
       email: 'teacher@eljur.local',
       passwordHash: teacherHash,
-      name: 'Иван Иванович',
+      name: 'Елена Алексеевна Митрошенкова',
       role: 'teacher',
     },
   });
@@ -39,21 +39,21 @@ async function main() {
     },
   });
 
-  // Create Group
+  // создаем группу
   const group = await prisma.group.create({
     data: {
-      name: 'ИСП-21',
-      course: 2,
+      name: 'ТИП-51',
+      course: 3,
     },
   });
-
-  // Create Student
+  
+  // создаем студента
   const studentHash = await bcrypt.hash('StudentPass123', 10);
   const studentUser = await prisma.user.create({
     data: {
       email: 'student@eljur.local',
       passwordHash: studentHash,
-      name: 'Петр Петров',
+      name: 'Рубаник Виктор',
       role: 'student',
     },
   });
@@ -64,14 +64,14 @@ async function main() {
     },
   });
 
-  // Create Subject
+  // создаем предмет
   const subject = await prisma.subject.create({
     data: {
-      name: 'Программирование',
+      name: 'Технология разработки программного обеспечения',
     },
   });
 
-  // Create Grade
+  // создаем оценку
   await prisma.grade.create({
     data: {
       studentId: student.id,
