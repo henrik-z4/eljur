@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { GlassCard } from '@/app/components/GlassCard';
+import { Card, CardHeader, CardTitle, CardContent } from '@/app/components/Card';
+import { Select } from '@/app/components/Select';
+import { Button } from '@/app/components/Button';
+import { GradeCircle } from '@/app/components/GradeCircle';
 
 interface Group {
   id: number;
@@ -56,7 +59,7 @@ export default function ReportsPage() {
     const headers = ['Студент', 'Оценки', 'Средний балл', 'Итоговая'];
     const rows = report.map(item => [
       item.name,
-      `"${item.grades}"`, // escape commas in grades
+      `"${item.grades}"`,
       item.average,
       item.final
     ]);
@@ -77,85 +80,171 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="min-h-screen p-8">
-      <GlassCard className="mb-8">
-        <h1 className="text-3xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
-          Отчеты успеваемости
-        </h1>
-        
-        <div className="flex flex-wrap gap-4 mb-4 items-end">
-          <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-600 mb-1">Группа</label>
-            <select
-              className="glass-input w-full px-4 py-2 rounded-lg"
+    <div className="min-h-screen p-4 md:p-8">
+      {/* header */}
+      <Card className="mb-8 animate-fade-in-up">
+        <CardHeader>
+          <CardTitle className="text-3xl md:text-4xl mb-2">
+            Отчеты успеваемости
+          </CardTitle>
+          <p className="text-gray-500">Сводная информация и экспорт данных</p>
+        </CardHeader>
+      </Card>
+
+      {/* фильтры */}
+      <Card className="mb-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+        <CardContent>
+          <div className="grid md:grid-cols-3 gap-4">
+            <Select
+              label="Группа"
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
             >
               <option value="">Выберите группу</option>
               {groups.map((g) => (
-                <option key={g.id} value={g.id}>{g.name}</option>
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
               ))}
-            </select>
-          </div>
+            </Select>
 
-          <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-600 mb-1">Предмет</label>
-            <select
-              className="glass-input w-full px-4 py-2 rounded-lg"
+            <Select
+              label="Предмет"
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
             >
               <option value="">Выберите предмет</option>
               {subjects.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
               ))}
-            </select>
-          </div>
+            </Select>
 
-          <button
-            onClick={downloadCSV}
-            disabled={!selectedGroup || !selectedSubject || report.length === 0}
-            className="glass-button glass-button-primary px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed h-[42px]"
-          >
-            Скачать CSV
-          </button>
+            <div className="flex items-end">
+              <Button
+                onClick={downloadCSV}
+                disabled={!selectedGroup || !selectedSubject || report.length === 0}
+                variant="primary"
+                className="w-full"
+              >
+                <svg
+                  className="w-5 h-5 mr-2 inline-block"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+                Скачать CSV
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* loading */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <p className="mt-4 text-gray-500">Формирование отчета...</p>
         </div>
-      </GlassCard>
+      )}
 
-      {loading && <div className="text-center text-gray-500">Загрузка...</div>}
-
+      {/* таблица отчета */}
       {!loading && report.length > 0 && (
-        <GlassCard className="overflow-hidden p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-white/50 border-b border-gray-200">
-                <tr>
-                  <th className="p-4 font-semibold text-gray-600">Студент</th>
-                  <th className="p-4 font-semibold text-gray-600">Оценки</th>
-                  <th className="p-4 font-semibold text-gray-600 text-right">Средний</th>
-                  <th className="p-4 font-semibold text-gray-600 text-right">Итог</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {report.map((item) => (
-                  <tr key={item.id} className="hover:bg-white/40 transition-colors">
-                    <td className="p-4 font-medium text-gray-800">{item.name}</td>
-                    <td className="p-4 text-gray-600">{item.grades}</td>
-                    <td className="p-4 text-right font-mono text-gray-800">{item.average}</td>
-                    <td className={`p-4 text-right font-bold ${
-                      item.final === 5 ? 'text-green-600' :
-                      item.final === 4 ? 'text-blue-600' :
-                      item.final === 3 ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
-                      {item.final}
-                    </td>
+        <Card className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200/50">
+                    <th className="text-left p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                      Студент
+                    </th>
+                    <th className="text-left p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                      Оценки
+                    </th>
+                    <th className="text-right p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                      Средний
+                    </th>
+                    <th className="text-right p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                      Итоговая
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100/50">
+                  {report.map((item, index) => (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-white/30 transition-colors"
+                    >
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
+                            {item.name.charAt(0)}
+                          </div>
+                          <span className="font-medium text-gray-900">{item.name}</span>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex flex-wrap gap-1.5">
+                          {item.grades.split(',').map((grade, idx) => {
+                            const score = parseInt(grade.trim());
+                            return !isNaN(score) && score >= 2 && score <= 5 ? (
+                              <GradeCircle key={idx} grade={score} size="sm" />
+                            ) : null;
+                          })}
+                        </div>
+                      </td>
+                      <td className="p-4 text-right">
+                        <span className="text-lg font-semibold text-gray-800">
+                          {item.average}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        {typeof item.final === 'number' && (
+                          <GradeCircle grade={item.final} size="md" />
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* пустое состояние */}
+      {!loading && !selectedGroup && !selectedSubject && (
+        <Card className="p-12 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="text-6xl mb-4">📊</div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              Выберите параметры отчета
+            </h3>
+            <p className="text-gray-500">
+              Используйте фильтры выше для формирования отчета успеваемости
+            </p>
           </div>
-        </GlassCard>
+        </Card>
+      )}
+
+      {/* нет данных */}
+      {!loading && selectedGroup && selectedSubject && report.length === 0 && (
+        <Card className="p-12 text-center">
+          <div className="text-gray-400 text-lg">
+            Нет данных для отображения
+          </div>
+        </Card>
       )}
     </div>
   );
 }
+

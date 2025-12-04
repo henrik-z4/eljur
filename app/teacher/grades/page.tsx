@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { GlassCard } from '@/app/components/GlassCard';
+import { Card, CardHeader, CardTitle, CardContent } from '@/app/components/Card';
+import { Select } from '@/app/components/Select';
+import { Button } from '@/app/components/Button';
+import { GradeCircle } from '@/app/components/GradeCircle';
+import { Badge } from '@/app/components/Badge';
 
 interface Group {
   id: number;
@@ -77,12 +81,11 @@ export default function TeacherGrades() {
         studentId,
         subjectId: selectedSubject,
         score,
-        type: 'homework', // пока хардкод
+        type: 'homework',
       }),
     });
 
     if (res.ok) {
-      // обновляем данные
       const newGrade = await res.json();
       setStudents((prev) =>
         prev.map((s) =>
@@ -92,7 +95,7 @@ export default function TeacherGrades() {
     }
   };
 
-  // удаление оценки (по клику)
+  // удаление оценки
   const handleGradeClick = async (gradeId: number) => {
     if (confirm('Удалить оценку?')) {
       const res = await fetch(`/api/grades/${gradeId}`, {
@@ -110,10 +113,10 @@ export default function TeacherGrades() {
   };
 
   // расчет среднего балла
-  const calculateAverage = (grades: Grade[]) => {
+  const calculateAverage = (grades: Grade[]): number => {
     if (grades.length === 0) return 0;
     const sum = grades.reduce((acc, g) => acc + g.score, 0);
-    return (sum / grades.length).toFixed(2);
+    return sum / grades.length;
   };
 
   // расчет итоговой оценки
@@ -125,97 +128,181 @@ export default function TeacherGrades() {
   };
 
   return (
-    <div className="min-h-screen p-8">
-      <GlassCard className="mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-            Журнал успеваемости
-          </h1>
-          <Link href="/reports" className="glass-button px-4 py-2 rounded-lg">
-            Отчеты
-          </Link>
+    <div className="min-h-screen p-4 md:p-8">
+      {/* header */}
+      <Card className="mb-8 animate-fade-in-up">
+        <CardHeader>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <CardTitle className="text-3xl md:text-4xl mb-2">
+                Журнал успеваемости
+              </CardTitle>
+              <p className="text-gray-500">Управление оценками студентов</p>
+            </div>
+            <div className="flex gap-3">
+              <Link href="/reports">
+                <Button variant="secondary">
+                  <svg
+                    className="w-5 h-5 mr-2 inline-block"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Отчеты
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* фильтры */}
+      <Card className="mb-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Select
+              label="Группа"
+              value={selectedGroup}
+              onChange={(e) => setSelectedGroup(e.target.value)}
+            >
+              <option value="">Выберите группу</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </Select>
+
+            <Select
+              label="Предмет"
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+            >
+              <option value="">Выберите предмет</option>
+              {subjects.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* loading */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <p className="mt-4 text-gray-500">Загрузка данных...</p>
         </div>
-        
-        <div className="flex gap-4 mb-4">
-          <select
-            className="glass-input px-4 py-2 rounded-lg bg-transparent"
-            value={selectedGroup}
-            onChange={(e) => setSelectedGroup(e.target.value)}
-          >
-            <option value="" className="text-black">Выберите группу</option>
-            {groups.map((g) => (
-              <option key={g.id} value={g.id} className="text-black">
-                {g.name}
-              </option>
-            ))}
-          </select>
+      )}
 
-          <select
-            className="glass-input px-4 py-2 rounded-lg bg-transparent"
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-          >
-            <option value="" className="text-black">Выберите предмет</option>
-            {subjects.map((s) => (
-              <option key={s.id} value={s.id} className="text-black">
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </GlassCard>
+      {/* список студентов */}
+      {!loading && selectedGroup && selectedSubject && students.length === 0 && (
+        <Card className="text-center p-12">
+          <div className="text-gray-400 text-lg">
+            Студенты не найдены
+          </div>
+        </Card>
+      )}
 
-      {loading && <div className="text-white text-center">Загрузка...</div>}
-
-      {!loading && selectedGroup && selectedSubject && (
-        <div className="grid gap-4">
-          {students.map((student) => {
-            const avg = parseFloat(calculateAverage(student.grades) as string);
+      {!loading && selectedGroup && selectedSubject && students.length > 0 && (
+        <div className="space-y-4">
+          {students.map((student, index) => {
+            const avg = calculateAverage(student.grades);
             const final = calculateFinal(avg);
 
             return (
-              <GlassCard key={student.id} className="flex items-center justify-between p-4">
-                <div className="w-1/4 font-medium text-lg text-gray-800">{student.user.name}</div>
-                
-                <div className="flex-1 flex flex-wrap gap-2 px-4">
-                  {student.grades.map((grade) => (
-                    <button
-                      key={grade.id}
-                      onClick={() => handleGradeClick(grade.id)}
-                      className="w-10 h-10 rounded-full flex items-center justify-center bg-white/50 hover:bg-white/80 transition-colors border border-gray-200 shadow-sm text-gray-800 font-medium"
-                      title={new Date(grade.date).toLocaleDateString()}
-                    >
-                      {grade.score}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => handleAddGrade(student.id)}
-                    className="w-10 h-10 rounded-full flex items-center justify-center border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all text-gray-400 hover:text-blue-500"
-                  >
-                    +
-                  </button>
-                </div>
+              <Card
+                key={student.id}
+                className="p-6 hover:scale-[1.01] transition-transform animate-fade-in-up"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+                  {/* имя студента */}
+                  <div className="lg:w-1/4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                        {student.user.name.charAt(0)}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-900">
+                          {student.user.name}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {student.grades.length} оценок
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
-                <div className="w-1/6 text-right">
-                  <div className="text-sm text-gray-500">Средний</div>
-                  <div className="text-xl font-bold text-gray-800">{avg || '-'}</div>
-                </div>
-                
-                <div className="w-1/6 text-right">
-                  <div className="text-sm text-gray-500">Итог</div>
-                  <div className={`text-2xl font-bold ${
-                    final === 5 ? 'text-green-500' :
-                    final === 4 ? 'text-blue-500' :
-                    final === 3 ? 'text-yellow-500' : 'text-red-500'
-                  }`}>
-                    {student.grades.length > 0 ? final : '-'}
+                  {/* оценки */}
+                  <div className="flex-1">
+                    <div className="flex flex-wrap gap-2">
+                      {student.grades.map((grade) => (
+                        <GradeCircle
+                          key={grade.id}
+                          grade={grade.score}
+                          date={grade.date}
+                          clickable
+                          onClick={() => handleGradeClick(grade.id)}
+                        />
+                      ))}
+                      <button
+                        onClick={() => handleAddGrade(student.id)}
+                        className="w-10 h-10 rounded-full border-2 border-dashed border-gray-300 hover:border-purple-400 hover:bg-purple-50 transition-all text-gray-400 hover:text-purple-600 flex items-center justify-center font-bold text-xl"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* статистика */}
+                  <div className="lg:w-1/5 flex gap-6 lg:justify-end">
+                    <div className="text-center">
+                      <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                        Средний
+                      </div>
+                      <div className="text-2xl font-bold text-gray-800">
+                        {avg.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                        Итоговая
+                      </div>
+                      <GradeCircle grade={final} size="lg" />
+                    </div>
                   </div>
                 </div>
-              </GlassCard>
+              </Card>
             );
           })}
         </div>
       )}
+
+      {/* пустое состояние */}
+      {!selectedGroup && !selectedSubject && (
+        <Card className="p-12 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="text-6xl mb-4">📚</div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              Выберите группу и предмет
+            </h3>
+            <p className="text-gray-500">
+              Используйте фильтры выше для отображения журнала успеваемости
+            </p>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
+

@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin", "cyrillic"],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: "Электронный журнал",
-  description: "Учет успеваемости студентов",
+  description: "Современная система учета успеваемости студентов",
 };
 
 export default function RootLayout({
